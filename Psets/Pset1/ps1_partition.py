@@ -1,4 +1,4 @@
-# From codereview.stackexchange.com                    
+# From codereview.stackexchange.com
 def partitions(set_):
     if not set_:
         yield []
