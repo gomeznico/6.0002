@@ -62,6 +62,9 @@ def greedy_cow_transport(cows,limit=10):
     heaviest_weight = 0
 
 
+    ## this could be made more efficient by create a copied/sorted list of
+    # the cows by weight, rather than searching through each time
+
     while len(cows_left) > 0:
         cargo_space_left = limit
         passengers =[]
@@ -110,12 +113,13 @@ def brute_force_cow_transport(cows,limit=10):
     trips
     """
     cow_list = list(cows.keys())
-    for trips_partition in get_partitions(cow_list):
-        is_permutation_valid = True
 
-        print(trips_partition)
+    all_possible_trips = []
+
+    for trips in get_partitions(cow_list):
+        is_permutation_valid = True
         # check weight of each trip
-        for trip in trips_partition:
+        for trip in trips:
             trip_weight = 0
             for cow in trip:
                 trip_weight += cows[cow]
@@ -127,7 +131,15 @@ def brute_force_cow_transport(cows,limit=10):
         # return first valid permutation
         # permutations have more trips as for loop goes on
         if is_permutation_valid:
-            return trips_partition
+            all_possible_trips.append(trips)
+
+    min_trips = len(cow_list)
+    best_trips = []
+    for trips in all_possible_trips:
+        if len(trips) < min_trips:
+            min_trips = len(trips)
+            best_trips = trips
+    return best_trips
 
 
 
@@ -182,11 +194,11 @@ Problem A.5 Writeup
     Which algorithm runs faster? Why?
 
     Greedy Algorithm took      000.01573562622070 msec to find a solution with 6 trips
-    Brute Force Algorithm took 228.26695442199707 msec to find a solution with 5 trips
+    Brute Force Algorithm took 280.26695442199707 msec to find a solution with 5 trips
 
     The Greedy Algorithm was faster, by ~20,000 times.  It builds a solution form the bottom up.  at worst, the time is O(n^2), where n is the number of cows.  it checks every cow for each possible trip.  At worst, the heaviest cow is the last one checked and completly fills up the cargo.  having to check each cow again for the remaining space.  Doing this check n times, such that there are n trips, 1 for each cow.
 
-    The brute force is recursive, and at minimum, has O(2^n) which as an exponential, greatly increase the number of operations, time, and memory required.
+    The brute force is recursive, and is O(2^n) which as an exponential, greatly increase the number of operations, time, and memory required.
 
 2.  Does the greedy algorithm return the optimal solution? Why/why not?
 
@@ -209,7 +221,7 @@ Problem A.5 Writeup
 
 3.  Does the brute force algorithm return the optimal solution? Why/why not?
 
-    Sometimes, depending on the order of the partitions searched, as it returns the first permutation thats valid, and sometiems it will find one with 6 and others with 5 trips.  But it does not search every 5 trip permutation before beginning the search for 6 trip permutations
+    Yes, or at least a version the optimal solution, as it has checked every valid (regarding cargo space) permutation of trips.  Then finds the most optimal one.
 
 '''
 
