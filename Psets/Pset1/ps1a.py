@@ -72,11 +72,11 @@ def greedy_cow_transport(cows,limit=10):
         # add passengers until no cargo space left
         while cargo_space_left > 0:
             for cow in cows_left:
-                weight = cows_left[cow]
+                weight = cows[cow]
                 # compare and update heaviest cow
                 if  heaviest_weight < weight <= cargo_space_left:
                     heaviest_cow = cow
-                    heaviest_weight = cows_left[heaviest_cow]
+                    heaviest_weight = cows[heaviest_cow]
             # when none cow remains heaviest, no space left
             if heaviest_cow == 'none':
                 break
@@ -181,7 +181,7 @@ def compare_cow_transport_algorithms():
 
 
 
-cows1 = load_cows('ps1_cow_data.txt')
+# cows1 = load_cows('ps1_cow_data.txt')
 # cows2 = load_cows('ps1_cow_data_2.txt')
 # cows3 = load_cows('ps1_cow_data_3.txt')
 
@@ -221,9 +221,10 @@ Problem A.5 Writeup
 
 3.  Does the brute force algorithm return the optimal solution? Why/why not?
 
-    Yes, or at least a version the optimal solution, as it has checked every valid (regarding cargo space) permutation of trips.  Then finds the most optimal one.
+    Yes, or at least a version the optimal solution, as it has checked every valid (regarding cargo space) permutation of trips.  Then returns the most optimal one.
 
 '''
+
 
 
 
