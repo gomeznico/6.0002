@@ -36,6 +36,9 @@ class Digraph(object):
     """
     def __init__(self):
         self.edges = {}
+            # key: node
+            # value: [node, node, node, ...]
+
     def addNode(self, node):
         if node in self.edges:
             raise ValueError('Duplicate node')
@@ -102,16 +105,23 @@ def DFS(graph, start, end, path, shortest, toPrint = False):
     """Assumes graph is a Digraph; start and end are nodes;
           path and shortest are lists of nodes
        Returns a shortest path from start to end in graph"""
+    # add start node to path, allows for recursion
+    # path is list of nodes already visited
     path = path + [start]
     if toPrint:
         print('Current DFS path:', printPath(path))
+    # base case, 0-length path
     if start == end:
         return path
     for node in graph.childrenOf(start):
         if node not in path: #avoid cycles
+            # keep searching this path if if shortest does not exist or it is currently shorter than known-shortest path
+            # if the current path is already longer than the shortest known path, it is already invalid
             if shortest == None or len(path) < len(shortest):
                 newPath = DFS(graph, node, end, path, shortest,
                               toPrint)
+                # if resultant newPath is not None, update shortest path
+                # will be shorter because of above if statement
                 if newPath != None:
                     shortest = newPath
         elif toPrint:
@@ -164,9 +174,10 @@ def BFS(graph, start, end, toPrint = False):
                 pathQueue.append(newPath)
     return None
 
+#redefine shortest path func to use BreadthFirstSearch
 def shortestPath(graph, start, end, toPrint = False):
     """Assumes graph is a Digraph; start and end are nodes
        Returns a shortest path from start to end in graph"""
     return BFS(graph, start, end, toPrint)
 
-#testSP('Boston', 'Phoenix')
+testSP('Boston', 'Phoenix')

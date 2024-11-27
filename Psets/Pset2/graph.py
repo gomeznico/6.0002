@@ -55,16 +55,18 @@ class Edge(object):
 
 class WeightedEdge(Edge):
     def __init__(self, src, dest, total_distance, outdoor_distance):
-        pass  # TODO
+        self.src = src
+        self.dest = dest
+        self.total_distance =total_distance
+        self.outdoor_distance =outdoor_distance
 
     def get_total_distance(self):
-        pass  # TODO
-
+        return self.total_distance
     def get_outdoor_distance(self):
-        pass  # TODO
+        return self.outdoor_distance
 
     def __str__(self):
-        pass  # TODO
+        return '{}->{} ({}, {})'.format(self.src, self.dest, self.total_distance,self.outdoor_distance)
 
 
 class Digraph(object):
@@ -87,17 +89,32 @@ class Digraph(object):
     def has_node(self, node):
         return node in self.nodes
 
+    def get_node(self, name):
+        for n in self.nodes:
+            if n.get_name() == name:
+                return n
+        raise NameError(name)
+
     def add_node(self, node):
         """Adds a Node object to the Digraph. Raises a ValueError if it is
         already in the graph."""
-        pass  # TODO
+        if node in self.nodes:
+            raise ValueError(node, ' already exists in graph')
+        self.nodes.add(node)
 
     def add_edge(self, edge):
         """Adds an Edge or WeightedEdge instance to the Digraph. Raises a
         ValueError if either of the nodes associated with the edge is not
         in the  graph."""
-        pass  # TODO
 
+        src =edge.get_source()
+        dest = edge.get_destination()
+        if src not in self.nodes or dest not in self.nodes:
+            raise ValueError('One or both of the nodes does not exist in graph')
+        if src in self.edges:
+            self.edges[src] = self.edges[src] + [edge]
+        else:
+            self.edges[src] = [edge]
 
 # ================================================================
 # Begin tests -- you do not need to modify anything below this line
@@ -155,4 +172,25 @@ class TestGraph(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+        g = Digraph()
+        na = Node('a')
+        na2 = Node('a')
+        nb = Node('b')
+        nc = Node('c')
+        g.add_node(na)
+        g.add_node(nb)
+        g.add_node(nc)
+        e1 = WeightedEdge(na, nb, 15, 10)
+        e2 = WeightedEdge(na, nc, 14, 6)
+        e3 = WeightedEdge(nb, nc, 3, 1)
+        g.add_edge(e1)
+        g.add_edge(e2)
+        g.add_edge(e3)
+
+        node = g.get_node('a')
+        edges =g.get_edges_for_node(node)
+        print(g.has_node(node))
+        for edge in edges:
+            print(edge.get_source(), edge.get_destination())
+
+

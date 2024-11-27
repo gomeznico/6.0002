@@ -20,6 +20,7 @@ from graph import Digraph, Node, WeightedEdge
 # represented?
 #
 # Answer:
+# Graph nodes represent the buildings, and the edges are the paths/hallways between them.  there are 2 different weights.  1 is the total length of the path, the other is the length outside in weather/cold
 #
 
 
@@ -42,13 +43,29 @@ def load_map(map_filename):
     Returns:
         a Digraph representing the map
     """
-
-    # TODO
     print("Loading map from file...")
+    with open(map_filename, 'r') as file:
+        g = Digraph()
+        for line in file:
+            arr = line.rstrip().split(' ')
+            # create node objects, then edge object
+            src , dest , dist, outside_dist =\
+                Node(arr[0]), Node(arr[1]), int(arr[2]), int(arr[3])
+            e = WeightedEdge(src,dest,dist,outside_dist)
+            # add nodes as req'd, then add edge to digraph object
+            if not g.has_node(src):
+                g.add_node(src)
+            if not g.has_node(dest):
+                g.add_node(dest)
+            g.add_edge(e)
+        return g
+
 
 # Problem 2c: Testing load_map
 # Include the lines used to test load_map below, but comment them out
 
+    # graph = load_map("test_load_map.txt")
+    # print(graph)
 
 #
 # Problem 3: Finding the Shorest Path using Optimized Search Method
@@ -57,7 +74,7 @@ def load_map(map_filename):
 #
 # What is the objective function for this problem? What are the constraints?
 #
-# Answer:
+# Answer:  It is to find the shortest distance between start and end nodes
 #
 
 # Problem 3b: Implement get_best_path
@@ -77,6 +94,7 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
             Represents the current path of nodes being traversed. Contains
             a list of node names, total distance traveled, and total
             distance outdoors.
+            [[node, node, node...] , total_dist, total_outside_dist]
         max_dist_outdoors: int
             Maximum distance spent outdoors on a path
         best_dist: int
@@ -86,17 +104,50 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
             The shortest path found so far between the original start
             and end node.
 
+
     Returns:
         A tuple with the shortest-path from start to end, represented by
         a list of building numbers (in strings), [n_1, n_2, ..., n_k],
         where there exists an edge from n_i to n_(i+1) in digraph,
         for all 1 <= i < k and the distance of that path.
+        ((n1,n2,n3, ...), distance)
 
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then return None.
     """
-    # TODO
-    pass
+    # will throw errors if invalid
+    start_node = digraph.get_node(start)
+    end_node = digraph.get_node(end)
+
+    # add start node_name to current path
+
+    path[0] = path[0] + [start]
+    if path[2] > max_dist_outdoors:
+        return None # if path is invalid b/c exceeds outdoor dist
+    elif start == end:
+        return path[0] , path[1]
+
+    # search each child node of start node
+    for edge in digraph.get_edges_for_node(start_node):
+        node = edge.get_destination().get_name()
+        if node not in path[0]:    #avoid cycles
+            distace = path[1] + edge.get_total_distance()
+            outdoors = path[2] + edge.get_outdoor_distance()
+            updated_path = [path[0],distace,outdoors]
+            new_path = get_best_path(digraph, node, end, updated_path, max_dist_outdoors,
+                              best_dist, best_path)
+
+
+            # if newpath is not invalid because of outdoors AND
+            # the new dist is less than best_dist/best dist is 0 i.e. the start
+            # print(new_path)
+            if (new_path != None):
+                if (new_path[1]<best_dist or best_dist == 0):
+                    best_path = new_path[0]
+                    best_dist = new_path[1]
+
+    return best_path, best_dist
+
 
 
 # Problem 3c: Implement directed_dfs
@@ -128,8 +179,15 @@ def directed_dfs(digraph, start, end, max_total_dist, max_dist_outdoors):
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then raises a ValueError.
     """
-    # TODO
-    pass
+    path = [[],0,0]
+    result = get_best_path(digraph,start,end, path, max_dist_outdoors, 0, [])
+
+    if result == None:
+        raise ValueError('Theres no path that meets the outdoor walking requirement')
+    if result[1] > max_total_dist:
+        raise ValueError('Theres no path that meets the total distance requirement')
+    return result[0]
+
 
 
 # ================================================================
@@ -141,6 +199,7 @@ class Ps2Test(unittest.TestCase):
 
     def setUp(self):
         self.graph = load_map("mit_map.txt")
+        print(self.graph)
 
     def test_load_map_basic(self):
         self.assertTrue(isinstance(self.graph, Digraph))
@@ -218,3 +277,4 @@ class Ps2Test(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
